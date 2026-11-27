@@ -74,7 +74,7 @@ async function showScore() {                // ① 함수 앞에 async
 showScore();
 console.log("이 줄이 먼저 찍혀요");          // 함수 바깥은 기다리지 않아요
 .
-w: `await`는 `async`가 붙은 함수 안에서만 쓸 수 있어요. 빼먹으면 결과 대신 `Promise {<pending>}`이 나와요.
+w: `await`는 `async`가 붙은 함수 안에서만 쓸 수 있어요. `await`를 빼먹으면 결과 대신 `Promise {<pending>}`이 나와요.
 s: `await`는 그 함수 안에서만 기다려요. 함수 바깥의 코드는 계속 실행돼요.
-s: 기억할 한 줄: "시간이 걸리는 함수 앞에는 `await`, 그 함수를 담은 함수 앞에는 `async`." 메서드 모양에서는 `이름: async function () { }`으로 써요.
+s: 기억할 한 줄: "시간이 걸리는 함수 앞에는 `await`, 그 함수를 담은 함수 앞에는 `async`." 메서드 모양에서는 `이름: async function () { }`로 써요.
 s: UI5에서는 데이터 파일을 읽는 `await oModel.loadData(...)`(8부)와 팝업을 불러오는 `await this.loadFragment(...)`(7부)에서 만나요.

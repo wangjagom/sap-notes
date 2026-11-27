@@ -78,7 +78,7 @@ c:xml
 </HBox>
 .
 s: `sapUiSmallMarginEnd`는 "오른쪽에 1rem 띄워 줘"예요. rem은 화면 기본 글자 크기(보통 16px)를 1로 잡은 길이 단위예요.
-w: HBox·VBox에는 `gap` 같은 간격 프로퍼티가 없어요. 적어도 아무 변화가 없으니 간격은 여백 클래스로 정해요.
+w: HBox·VBox에는 `gap` 같은 간격 프로퍼티가 없어요. 써도 아무 변화가 없으니 간격은 여백 클래스로 정해요.
 s: `width="100%"`인 컨트롤에 양옆 여백을 주면 화면을 넘어요. `width="auto"`를 주거나 `sapUiForceWidthAuto` 클래스를 같이 붙여요.
 
 @kw Fragment
@@ -88,7 +88,7 @@ c:xml
 <core:Fragment fragmentName="ncode.zcXXw0108.view.Frag" type="XML" />
 .
 s: 화면에 바로 끼워 넣을 때는 위처럼 쓰고, 팝업처럼 처음부터 보일 필요가 없는 것은 코드로 불러와요(아래 Dialog).
-w: `<core:Fragment ... id="fragId" />`처럼 id를 주면 안 컨트롤 id 앞에 그 id가 붙어서 `this.byId("inpName")`로 못 찾아요. id를 주지 않으면 바로 찾을 수 있어요.
+w: `<core:Fragment ... id="fragId" />`처럼 id를 주면 안의 컨트롤 id 앞에 그 id가 붙어서 `this.byId("inpName")`로 못 찾아요. id를 주지 않으면 바로 찾을 수 있어요.
 
 @kw Dialog 팝업
 d: 팝업은 Fragment로 만들고, 처음 한 번만 불러와서 컨트롤러(`this`)에 저장해 두고 다음부터는 저장한 것을 열어요. (수업 0201, 0202)

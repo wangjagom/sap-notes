@@ -11,6 +11,7 @@ tb:
 5. 팝업 | `onOpen...` | 한 번만 불러오기, 같은 경로로 연결, 열기 | `this._oDialog.bindElement(sPath)` | 4부, 7부
 6. 표시 | XML | 코드를 글자로, 금액 형식 | `{= ... }`, `sap.ui.model.type.Currency` | 12부
 .
+s: 화면은 작업 순서대로 왼쪽에서 오른쪽으로 [검색 조건 | 목록 | 상세]를 놓으면 시선이 한 방향으로 움직여요. SAP Fiori의 Flexible Column Layout도 같은 생각이에요.
 
 @kw 작은 앱 한 개 완성하기
 d: 반을 골라 검색하면 그 반 학생만 테이블에 보이고, 한 줄을 누르면 아래에 상세가 나오는 앱이에요. 파일은 데이터, 화면, 동작 세 개예요.
@@ -97,8 +98,7 @@ d: 흐름을 만들 때 자주 어긋나는 네 가지예요.
 s: 초깃값을 정한 뒤에는 `this.onSearch()`를 불러요. `onInit`에 필터 코드를 또 쓰면 같은 논리가 두 곳에 생겨서 처음 화면과 검색 결과가 달라질 수 있어요.
 s: 상세는 복사하지 말고 경로로 연결해요. `setData(getObject())`보다 `bindElement(getPath())`가 짧고 안전해요.
 s: 팝업은 화면에 보이는 것을 기준으로 연결해요. 콤보박스 선택값을 기준으로 하면, 콤보만 바꾸고 검색을 안 누른 상태에서 패널과 팝업 내용이 달라져요.
-w: 아무것도 선택되지 않은 경우를 막아요. `getSelectedItem()`이나 `getBindingContext()`가 없을 때는 `if (!oCtx) return;`로 일찍 끝내요.
-s: 화면은 작업 순서대로 왼쪽에서 오른쪽으로 [검색 조건 | 목록 | 상세]를 놓으면 시선이 한 방향으로 움직여요. SAP Fiori의 Flexible Column Layout도 같은 생각이에요.
+w: 아무것도 선택되지 않은 경우를 막아요. `getSelectedItem()`이나 `getBindingContext()`의 결과가 없을 때는 `if (!oCtx) return;`로 일찍 끝내요.
 
 @ch ch-14 | 14부 | 흔한 에러 모음 | 수업 프로젝트와 과제에서 실제로 나온 에러들이에요. 증상으로 찾아봐요.
 

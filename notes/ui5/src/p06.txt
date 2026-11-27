@@ -79,7 +79,11 @@ const sName = oInput.getValue();          // 적힌 글자를 읽어요  예: "�
 oInput.setValue("지아");                   // 입력칸에 글자를 넣어요
 .
 s: `this.getView()`는 이 컨트롤러가 맡은 화면 전체를 돌려줘요. 화면에 데이터를 연결할 때도 `this.getView().setModel(...)`처럼 화면을 먼저 꺼내요.
-w: XML에 id가 없으면 `byId`는 `undefined`를 돌려줘요.
+w: XML에 id가 없으면 `byId`는 `undefined`를 돌려줘요. 이어 붙인 다음 메서드에서 `reading 'getValue'` 같은 에러가 나요(4부 메서드 체이닝).
+c:js
+this.getView().byId("inpName").getValue().trim();
+//   화면       → 입력칸        → 적힌 글자 → 앞뒤 공백 제거
+.
 m: 더 알아보기: document.getElementById와 다른 점
 UI5는 XML id 앞에 화면 이름 같은 글자를 붙여서 실제 id를 길게 만들어요(예: `__xmlview0--inpName`). 그래서 `document.getElementById("inpName")`은 못 찾고 `null`을 돌려줘요. UI5에서는 항상 `byId`를 써요.
 /m
@@ -151,14 +155,6 @@ onType: function (oEvent) {                       // <Input liveChange=".onType"
 .
 s: `liveChange`는 글자를 칠 때마다 일어나는 이벤트예요.
 s: `getParameter`로 꺼낼 이름(`value`, `selectedItem`, `listItem` 등)은 컨트롤마다 달라요. UI5 API 문서에서 그 컨트롤의 Events 항목을 보면 나와요.
-
-@kw 길게 이어진 메서드
-d: UI5 코드는 대부분 메서드 체이닝 모양이에요. 오른쪽으로 갈수록 더 구체적인 것을 꺼내요.
-c:js
-this.getView().byId("inpName").getValue().trim();
-//   화면       → 입력칸        → 적힌 글자 → 앞뒤 공백 제거
-.
-w: 중간에 하나라도 `undefined`면 그 뒤는 모두 에러예요. XML에 id가 없으면 `byId`가 `undefined`라서 `reading 'getValue'` 에러가 나요. 한 단계씩 끊어서 `console.log`로 확인해요.
 
 @kw UI5 변수 이름 규칙
 d: 1부의 접두어에 더해, UI5의 컨트롤, 모델, 이벤트는 모두 객체라서 `o`로 시작해요. 맨 앞의 `_`는 "이 컨트롤러 안에서만 쓰는 것"이라는 표시예요.
