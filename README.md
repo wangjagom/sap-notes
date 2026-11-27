@@ -25,6 +25,7 @@ public/abap/img/      ABAP 노트 화면 사진
 ```bash
 python notes/abap/build.py
 python notes/ui5/build.py
+python notes/home/build.py   # 노트를 고친 뒤 마지막에 (키워드 수 갱신)
 ```
 
 UI5 카드 원본 문법:
