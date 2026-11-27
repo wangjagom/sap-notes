@@ -1,0 +1,238 @@
+@ch ch-7 | 7부 | 화면 만들기 | 화면은 컨트롤 안에 컨트롤을 넣어 만들어요. 배치만 정하는 레이아웃 컨트롤, 화면 조각 Fragment, 팝업 Dialog를 배워요. 수업 0108~0202
+
+@kw 레이아웃 컨트롤
+d: 다른 컨트롤을 담아 배치만 정하는 컨트롤이에요.
+tb:
+컨트롤 | 하는 일 | 자주 쓰는 설정
+`HBox` | 안의 것을 가로로 나열 | `alignItems`, `justifyContent`, `wrap="Wrap"`
+`VBox` | 안의 것을 세로로 나열 | `alignItems="Start"`
+`Panel` | 제목이 있고 접을 수 있는 영역 | `headerText`, `expandable`, `expanded`
+`f:SimpleForm` | "라벨 - 입력칸" 쌍을 자동으로 줄 맞춤 | `editable`, `labelSpanM`, `columnsL`
+`l:Grid` | 화면을 12칸으로 나눠 배치 (수업 0201) | 자식마다 `<l:GridData span="..." />`
+.
+c:xml
+<f:SimpleForm editable="true" labelSpanM="4">
+    <f:content>
+        <Label text="학생번호" />
+        <Input value="{Sid}" editable="false" />
+        <Label text="학생명" />
+        <Input value="{Sname}" editable="false" />
+    </f:content>
+</f:SimpleForm>
+.
+s: `SimpleForm` 안에는 `Label`과 입력 컨트롤을 번갈아 넣으면 스스로 줄을 맞춰 줘요. 안에 HBox/VBox를 또 넣을 필요가 없어요.
+s: Grid의 `span="L2 M4 S6"`은 큰(Large) 화면에서 12칸 중 2칸, 중간(Medium) 4칸, 작은(Small) 6칸을 차지하라는 뜻이에요. 화면 크기에 따라 배치가 바뀌어요.
+
+@kw justifyContent · alignItems
+d: HBox·VBox 안의 것을 어느 쪽에 붙일지 정해요. `justifyContent`는 나열 방향, `alignItems`는 그와 직각인 방향의 정렬이에요.
+l: 책장에 책을 꽂을 때, 왼쪽부터 붙일지 가운데로 모을지는 줄 방향 정렬이고, 키가 다른 책을 칸의 위나 아래 어디에 맞출지는 높이 방향 정렬이에요.
+tb:
+설정 | HBox에서는 | VBox에서는
+`justifyContent` | 가로 정렬 | 세로 정렬
+`alignItems` | 세로 정렬 | 가로 정렬
+.
+tb:
+값 | 모양
+`Start` (justifyContent 기본) | 시작 쪽부터 붙여요
+`Center` | 가운데로 모아요
+`End` | 끝 쪽에 붙여요
+`SpaceBetween` | 첫째와 마지막을 양 끝에, 나머지는 사이를 똑같이
+`SpaceAround` | 각 항목 양옆에 같은 여백
+`Stretch` (alignItems 기본) | 칸 높이에 맞춰 늘려요
+`Baseline` | 글자 바닥선을 맞춰요
+.
+c:xml
+<HBox justifyContent="SpaceBetween" alignItems="Center">
+    <Title text="학생 목록" />
+    <Button text="추가" press=".onAdd" />
+</HBox>
+.
+w: VBox에서는 가로와 세로가 뒤바뀌어요. VBox의 `justifyContent="Center"`는 가로가 아니라 세로 가운데예요.
+s: `alignItems="Center"`인데 세로 가운데로 안 가 보이면, HBox 높이가 내용 높이와 같아서 움직일 자리가 없는 거예요.
+m: 더 알아보기: 남는 칸 차지하기(growFactor)
+항목의 `layoutData`에 `FlexItemData growFactor="1"`을 주면 그 항목이 남는 칸을 가져가요. 기본값 0은 자기 크기만 차지해요.
+c:xml
+<HBox>
+    <Input value="{Sname}">
+        <layoutData>
+            <FlexItemData growFactor="1" />
+        </layoutData>
+    </Input>
+    <Button text="검색" />
+</HBox>
+.
+/m
+
+@kw 여백 클래스
+d: 컨트롤 사이를 띄우려고 `class`에 붙이는 미리 만든 모양 이름이에요. `sapUi` + 크기 + `Margin` + 방향으로 만들어요.
+tb:
+구분 | 값
+크기 | `Tiny` 0.5rem(8px), `Small` 1rem(16px), `Medium` 2rem(32px), `Large` 3rem(48px)
+방향 | 안 적으면 사방, `Top`, `Bottom`, `Begin`(왼쪽), `End`(오른쪽), `TopBottom`, `BeginEnd`
+.
+c:xml
+<HBox alignItems="Center">
+    <Label text="학생명" class="sapUiSmallMarginEnd" />
+    <Input value="{Sname}" class="sapUiSmallMarginEnd" />
+    <Button text="검색" />
+</HBox>
+.
+s: `sapUiSmallMarginEnd`는 "오른쪽에 1rem 띄워 줘"예요. rem은 화면 기본 글자 크기(보통 16px)를 1로 잡은 길이 단위예요.
+w: HBox·VBox에는 `gap` 같은 간격 프로퍼티가 없어요. 적어도 아무 변화가 없으니 간격은 여백 클래스로 정해요.
+s: `width="100%"`인 컨트롤에 양옆 여백을 주면 화면을 넘어요. `width="auto"`를 주거나 `sapUiForceWidthAuto` 클래스를 같이 붙여요.
+
+@kw Fragment
+d: 컨트롤러가 없는 작은 화면 조각이에요. 파일 이름은 `이름.fragment.xml`, 맨 바깥 태그는 `core:FragmentDefinition`이에요. (수업 0108)
+s: 안의 버튼 이벤트는 자기를 불러온 화면의 컨트롤러가 처리해요.
+c:xml
+<core:Fragment fragmentName="ncode.zcXXw0108.view.Frag" type="XML" />
+.
+s: 화면에 바로 끼워 넣을 때는 위처럼 쓰고, 팝업처럼 처음부터 보일 필요가 없는 것은 코드로 불러와요(아래 Dialog).
+w: `<core:Fragment ... id="fragId" />`처럼 id를 주면 안 컨트롤 id 앞에 그 id가 붙어서 `this.byId("inpName")`로 못 찾아요. id를 주지 않으면 바로 찾을 수 있어요.
+
+@kw Dialog 팝업
+d: 팝업은 Fragment로 만들고, 처음 한 번만 불러와서 컨트롤러(`this`)에 저장해 두고 다음부터는 저장한 것을 열어요. (수업 0201, 0202)
+c:xml
+<!-- view/Popup.fragment.xml -->
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <Dialog id="dlgPopup" title="강사 정보">
+        <content>
+            <Text text="팝업 내용" />
+        </content>
+        <buttons>
+            <Button text="닫기" press=".onClose" />
+        </buttons>
+    </Dialog>
+</core:FragmentDefinition>
+.
+c:js
+onOpenPopup: async function () {
+    if (!this._oDialog) {                         // 처음 한 번만
+        this._oDialog = await this.loadFragment({
+            name: "ncode.zcXXw0201.view.Popup"    // 앱 id + .view. + 파일 이름
+        });
+    }
+    this._oDialog.open();
+},
+onClose: function () {
+    this._oDialog.close();
+}
+.
+s: `loadFragment`는 불러온 팝업을 화면에 자동으로 연결해 줘요. 그래서 화면의 모델을 팝업에서도 쓰고, `this.byId("dlgPopup")`로도 찾을 수 있어요.
+w: `loadFragment`는 시간이 걸려서 `await`가 필요하고, 그래서 메서드에 `async`가 붙어요. `async` 없이 `await`만 쓰면 문법 에러로 앱이 통째로 안 떠요.
+w: 함수 안의 `let oDialog`에 저장하면 누를 때마다 새로 생겨서 매번 새로 불러오고, id 중복 에러가 나요. 계속 쓸 것은 `this`에 넣어요(4부 스코프).
+w: 팝업을 Fragment로 옮겼다면 View XML에 같은 id의 `<Dialog>`가 남아 있으면 안 돼요.
+m: 더 알아보기: 공식 예제의 ??=와 .then
+공식 예제는 `this.pDialog ??= this.loadFragment({...}); this.pDialog.then(oDialog => oDialog.open());`로 써요. `??=`(널 병합 할당)는 앞의 값이 `undefined`나 `null`일 때만 넣어서, `if (!this._oDialog)`와 거의 같은 일을 해요.
+/m
+
+@ch ch-8 | 8부 | 데이터 바인딩 1: 모델과 프로퍼티 바인딩 | 바인딩(Binding)은 "이 컨트롤의 이 프로퍼티는 저 데이터를 보여줘"라고 연결만 해 두는 거예요. 바인딩은 항상 모델을 거쳐요. 수업 0203~0204
+
+@kw 바인딩(Binding)
+d: 컨트롤의 프로퍼티와 모델의 데이터를 연결해 둬요. 데이터가 바뀌면 화면도 바로 바뀌어서 `setValue`를 일일이 부를 필요가 없어요.
+c:js
+// 바인딩 전 (0108): 값을 직접 하나씩 넣기
+this.byId("inpFName").setValue("김");
+this.byId("inpName").setValue("민수");
+
+// 바인딩 후 (0203): 데이터를 모델에 넣고, 화면은 연결만
+const oModel = new JSONModel({ bookInfo: { code: "UX400", name: "SAPUI5" } });
+this.getView().setModel(oModel);
+.
+c:xml
+<Input value="{/bookInfo/code}" />   <!-- UX400 -->
+<Input value="{/bookInfo/name}" />   <!-- SAPUI5 -->
+.
+s: 중괄호 `{ }`는 "글자 그대로가 아니라 모델에서 가져와 줘"라는 표시예요.
+w: 컨트롤러의 변수를 XML에서 바로 가리킬 수는 없어요. 화면에 보일 값은 모델에 넣어요.
+s: `JSONModel`도 `sap.ui.define` 목록에 `"sap/ui/model/json/JSONModel"`을 추가해야 쓸 수 있어요.
+
+@kw Binding Path
+d: 모델 안 데이터의 위치예요. 1부의 객체·배열 경로에서 점(`.`)과 대괄호를 슬래시(`/`)로 바꾼 모양이에요.
+c:js
+const oData = {
+    bookInfo: { code: "UX400", name: "SAPUI5" },
+    esStdList: [
+        { Sid: "25010001", Sname: "민수" },     // 0번
+        { Sid: "25010002", Sname: "지아" }      // 1번
+    ]
+};
+.
+tb:
+자바스크립트 | UI5 Binding Path
+`oData.bookInfo.code` | `{/bookInfo/code}`
+`oData.esStdList` | `{/esStdList}`
+`oData.esStdList[1].Sname` | `{/esStdList/1/Sname}`
+`catModel`의 `CAT01` | `{catModel>/CAT01}`
+.
+s: 맨 앞의 `/`는 모델의 맨 위(`oData`)예요. 배열 번호도 0부터라서 `/esStdList/1`은 두 번째 학생이에요.
+s: 6부의 모듈 경로(`"sap/ui/model/json/JSONModel"`)는 파일 위치이고, Binding Path는 데이터 안의 위치예요.
+
+@kw JSONModel
+d: 자바스크립트 객체나 JSON 파일을 데이터로 쓰는 모델이에요. 만들고, 화면에 연결하면 그 화면과 안의 모든 컨트롤이 이 모델을 볼 수 있어요.
+l: 모델은 진열대 뒤 선반, 화면은 진열대예요. 바인딩은 "진열대의 이 자리에는 선반의 저 물건을 놓아 줘"라고 적어 둔 라벨이에요.
+c:js
+const oModel = new JSONModel();                 // 만들기
+this.getView().setModel(oModel);                // 화면에 연결하기
+await oModel.loadData("model/data.json");       // 파일에서 읽기
+console.log(oModel.getData());                  // { ... }
+.
+w: `loadData`는 시간이 걸려요. `await`를 빼먹으면 바로 다음 줄의 `getData()`가 `{}`로 비어 있어요. `await`는 `async`가 붙은 메서드 안에서만 쓸 수 있어요.
+s: 데이터 파일(`data.json`)에 문법 오타가 있으면 모델이 비어서 화면이 텅 비어 보여요(1부 JSON).
+s: 모델은 부모에서 자식으로 전달돼요. 화면에 연결하면 그 안의 컨트롤과 팝업도 쓸 수 있어요.
+
+@kw 이름 있는 모델
+d: 한 화면에 모델을 여러 개 연결할 때 이름을 붙여 구분해요. XML에서는 모델 이름, `>`, 경로 순서로 써요.
+tb:
+ | 연결 | XML에서 쓰기 | 컨트롤러에서 꺼내기
+기본 모델 | `setModel(oModel)` | `{/bookInfo/code}` | `getModel()`
+이름 있는 모델 | `setModel(oModel, "empModel")` | `{empModel>/empName}` | `getModel("empModel")`
+.
+w: `{/empModel>/empName}`처럼 슬래시를 이름 앞에 붙이면 동작하지 않아요.
+s: 화면 제목의 `{i18n>title}`도 `i18n`이라는 이름 있는 모델이에요.
+
+@kw 모델의 종류
+d: 데이터가 어디서 오는지에 따라 모델을 골라요.
+tb:
+모델 | 쓰는 곳
+`JSONModel` | 직접 만든 데이터, 화면 상태값 (지금 수업에서 쓰는 것)
+`ResourceModel` | 다국어 문구 (`i18n.properties`), `{i18n>title}`
+`ODataModel` | SAP 백엔드 서버의 실제 데이터 (나중에 배울 내용)
+.
+s: OData는 Open Data Protocol, 서버와 데이터를 주고받는 약속이에요.
+
+@kw getProperty · setProperty
+d: 모델에서 Binding Path 자리의 값을 꺼내거나 바꿔요. `setProperty`로 바꾸면 연결된 화면이 자동으로 바뀌어요.
+c:js
+const oModel = this.getView().getModel();
+oModel.getProperty("/bookInfo/name");             // "SAPUI5"
+oModel.setProperty("/bookInfo/name", "ABAP");     // → 화면도 자동으로 "ABAP"
+.
+w: `getData()`로 꺼낸 객체를 직접 고치면 모델은 바뀐 걸 몰라서 화면이 그대로예요. 값을 바꿀 때는 `setProperty`를 써요.
+
+@kw TwoWay Binding
+d: 화면과 모델이 서로 따라 바뀌어요. JSONModel은 기본이 TwoWay라서, 입력칸에 글자를 치면 모델 값도 같이 바뀌어요.
+c:xml
+<Input value="{/bookInfo/name}" />
+<Select selectedKey="{/selectedSCode}" />   <!-- 수업 0205 -->
+.
+s: 그래서 검색 조건 같은 입력값은 `byId(...).getValue()` 대신 모델에서 `getProperty`로 꺼낼 수도 있어요.
+
+@kw 객체 키로 바로 찾기
+d: 코드를 키로 쓰는 객체를 모델로 만들면, 경로에 코드를 넣는 것만으로 바로 찾아가요. (수업 0204)
+c:js
+const oCatModel = new JSONModel({ CAT01: "야개", CAT02: "야꼬" });
+this.getView().setModel(oCatModel, "catModel");
+.
+c:xml
+<Text text="{catModel>/CAT01}" />   <!-- 야개 -->
+.
+s: 반 코드로 반 정보를 찾을 때도 `"/classMap/" + sCid` 같은 경로를 만들 수 있어요.
+
+@kw 파일 경로(toUrl)
+d: `/`로 시작하는 경로는 BAS 미리보기에서는 되지만 Launchpad에 올리면 못 찾을 수 있어요. 앱 위치 기준 경로를 만드는 `sap.ui.require.toUrl`을 쓰면 어디서나 안전해요.
+c:js
+const sUrl = sap.ui.require.toUrl("ncode/zcXXw0210/model/data.json");
+await oModel.loadData(sUrl);
+.
+s: `toUrl`에 넘기는 경로는 앱 id의 점을 슬래시로 바꾼 모양이에요. 수업 미리보기에서는 몰라도 돼요.

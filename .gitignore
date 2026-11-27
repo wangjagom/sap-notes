@@ -11,3 +11,4 @@ node_modules/
 dist/
 .astro/
 .claude/
+notes/ui5/base.html

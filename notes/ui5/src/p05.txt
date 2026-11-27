@@ -1,0 +1,80 @@
+@ch ch-5 | 5부 | 비동기 | 파일을 읽거나 서버에 요청하는 일은 시간이 걸려요. 자바스크립트는 그걸 기다리지 않고 다음 줄로 넘어가요. 이렇게 기다리지 않는 방식을 비동기(Asynchronous)라고 해요.
+
+@kw setTimeout
+d: 정해진 시간이 지난 뒤에 함수를 실행하도록 맡겨 둬요. 맡겨 두기만 하고 기다리지 않아요.
+l: 주방 타이머를 맞춰 놓고 다른 일을 하다가, 삐 소리가 나면 그때 할 일을 하는 것과 같아요.
+t:
+setTimeout(콜백 함수, 기다릴 시간);
+.
+c:js
+let sResult = "아직 없음";
+setTimeout(() => {
+    sResult = "도착!";           // 1초 뒤에 실행돼요
+}, 1000);
+console.log(sResult);            // "아직 없음"  ← 기다려 주지 않고 바로 실행돼요
+.
+s: 기다릴 시간은 밀리초 단위라서 `1000`이 1초예요. 이 노트에서는 서버나 파일처럼 시간이 걸리는 일을 흉내 낼 때 써요.
+w: 함수 이름 뒤에 `()`를 붙이면 지금 바로 실행돼요. `setTimeout(sayHello, 1000)`처럼 함수 자체를 건네요(3부 콜백 함수).
+
+@kw Promise
+d: 시간이 걸리는 함수가 결과 대신 바로 돌려주는 "나중에 줄게"라는 약속 상자예요.
+l: 식당의 진동벨이에요. 주문하면 음식 대신 벨을 받고, 준비되면 벨이 울려요.
+c:js
+function getScore() {
+    return new Promise(resolve => {
+        setTimeout(() => resolve(90), 1000);   // 1초 뒤에 90을 줄게요
+    });
+}
+const p = getScore();
+console.log(p);                            // 바로: Promise {<pending>}
+setTimeout(() => console.log(p), 1500);   // 1.5초 뒤: Promise {<fulfilled>: 90}
+.
+tb:
+상태 | 영어 | 식당으로 말하면 | 상자 안에는
+기다리는 중 | `pending` | 음식을 만드는 중 | 아직 없어요
+성공 | `fulfilled` | 벨이 울리고 음식이 나옴 | 결과 (여기서는 90)
+실패 | `rejected` | 재료가 떨어져 주문 취소 | 에러 정보
+.
+s: 처음엔 항상 기다리는 중이고, 일이 끝나면 성공이나 실패로 딱 한 번 바뀌어요. 한 번 바뀐 상태는 다시 바뀌지 않아요.
+s: `getScore` 안의 `resolve`는 "잘 끝났어요, 결과는 이거예요"라고 알리는 버튼이에요. 실패를 알리는 버튼은 `reject`예요. 8부에서 데이터 파일을 읽을 때 쓰여요.
+
+@kw then
+d: Promise 상자에 "채워지면 이 일을 해 줘"라고 할 일을 맡기는 메서드예요. 맡겨만 두고 다음 줄로 넘어가요.
+t:
+시간이 걸리는 함수().then(결과 => {
+    결과로 할 일;
+});
+.
+c:js
+getScore().then(nScore => console.log("점수:", nScore));
+console.log("먼저 찍혀요");
+// 먼저 찍혀요
+// 점수: 90        ← 1초 뒤
+.
+w: `then` 바깥에서 결과를 쓰면 아직 비어 있어요. 결과를 쓰는 코드는 모두 `then`에 넘긴 함수 안에 넣어요.
+c:js
+let nResult;
+getScore().then(nScore => { nResult = nScore; });
+console.log(nResult);     // ❌ undefined  ← 아직 벨이 안 울렸어요
+.
+
+@kw async / await
+d: `then`과 같은 일을 위에서 아래로 읽히게 쓰는 문법이에요. `await`는 결과가 올 때까지 기다렸다가 꺼내 줘요.
+t:
+async function 함수이름() {
+    const 결과 = await 시간이 걸리는 함수();
+    결과로 할 일;
+}
+.
+c:js
+async function showScore() {                // ① 함수 앞에 async
+    const nScore = await getScore();        // ② 1초 기다렸다가 결과를 꺼내요
+    console.log(nScore);                    // ③ 90
+}
+showScore();
+console.log("이 줄이 먼저 찍혀요");          // 함수 바깥은 기다리지 않아요
+.
+w: `await`는 `async`가 붙은 함수 안에서만 쓸 수 있어요. 빼먹으면 결과 대신 `Promise {<pending>}`이 나와요.
+s: `await`는 그 함수 안에서만 기다려요. 함수 바깥의 코드는 계속 실행돼요.
+s: 기억할 한 줄: "시간이 걸리는 함수 앞에는 `await`, 그 함수를 담은 함수 앞에는 `async`." 메서드 모양에서는 `이름: async function () { }`으로 써요.
+s: UI5에서는 데이터 파일을 읽는 `await oModel.loadData(...)`(8부)와 팝업을 불러오는 `await this.loadFragment(...)`(7부)에서 만나요.

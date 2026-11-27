@@ -1,11 +1,48 @@
 # Facula
 
-차근차근 따라가는 학습 노트 사이트예요. 지금은 SAP 교재가 첫 주제이고, 다른 주제(자바스크립트, 국어 문법 등)도 계속 추가할 거예요.
+차근차근 따라가는 학습 노트 사이트예요. 지금은 SAPUI5와 SAP ABAP 수업 정리 노트가 있어요.
 
 주소: https://wangjagom.github.io/facula/
 
 사이트는 Astro로 만들어요. `main`에 push하면 GitHub Actions가 빌드해서 GitHub Pages에 배포해요.
 예전 파이썬 빌드(`tools/build.py`)는 결과를 비교하고 그림 조각을 뽑는 용도로만 남아 있어요.
+
+## 노트 (키워드 카드형)
+
+두 노트는 정적 HTML이에요. `notes/`에서 만들어 `public/`에 넣으면 Astro가 그대로 배포해요.
+
+```
+notes/
+├─ shared/            공통 스타일(v4.css), 글꼴, 아이콘
+├─ abap/base.html     ABAP 노트 본문(원본)
+├─ abap/build.py      → public/abap/index.html
+├─ ui5/src/*.txt      UI5 노트 카드 원본 (아래 문법)
+├─ ui5/conv.py        카드 원본 → 본문 HTML
+└─ ui5/build.py       → public/sap-ui5/index.html
+public/abap/img/      ABAP 노트 화면 사진
+```
+
+```bash
+python notes/abap/build.py
+python notes/ui5/build.py
+```
+
+UI5 카드 원본 문법:
+
+```
+@ch ch-1 | 1부 | 제목 | 부 소개 한 줄
+@kw 키워드 이름
+d: 한 줄 정의 (핵심만 보기에서도 보여요)
+e: 쉬운 설명   l: 비유   s: 보충   w: 주의
+t:            문법 틀 (마침표 한 줄로 끝)
+c:js          코드 (js, xml, json, text) (마침표 한 줄로 끝)
+tb:           표: "칸 | 칸" 한 줄씩 (마침표 한 줄로 끝)
+m: 더 알아보기 제목  ...  /m
+```
+
+## 예전 교재
+
+긴 글로 쓴 예전 교재 원본은 `archive/`에 있어요(빌드에 안 써요). 이전 Astro 교재 틀(`src/`, `tools/`)은 다시 쓸 때를 위해 남겨 뒀어요.
 
 ## 폴더 구조
 

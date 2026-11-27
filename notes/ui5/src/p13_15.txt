@@ -1,0 +1,319 @@
+@ch ch-13 | 13부 | 종합: 검색, 목록, 상세, 팝업 | 실무에서 가장 흔한 화면은 조건을 고르고, 목록을 걸러 보고, 한 건을 골라 상세를 보고, 더 자세한 건 팝업으로 보는 구조예요. Lev05가 이 패턴이에요.
+
+@kw 검색-목록-상세-팝업 흐름
+d: 목록에서 고른 한 줄의 경로(`getPath()`)가 상세, 반 정보, 팝업으로 이어져요. 데이터를 복사하지 않고 경로만 넘기는 게 핵심이에요.
+tb:
+단계 | 메서드 | 하는 일 | 핵심 코드 | 배운 곳
+1. 준비 | `onInit` | 데이터 파일 읽기, 콤보 목록, 초깃값 | `await oModel.loadData(...)` | 5부, 8부
+2. 검색 | `onSearch` | 선택값 읽기, 필수값 검사, 필터와 정렬 | `oBinding.filter(aFilter).sort(oSorter)` | 2부, 3부, 11부
+3. 상세 | `onSelect` | 고른 줄의 경로로 상세 패널 연결 | `oPanel.bindElement(oCtx.getPath())` | 9부, 10부
+4. 관련 정보 | `onSelect` | 학생의 반 코드로 반 목록에서 위치 찾기 | `"/classList/" + iIdx` | 3부, 10부
+5. 팝업 | `onOpen...` | 한 번만 불러오기, 같은 경로로 연결, 열기 | `this._oDialog.bindElement(sPath)` | 4부, 7부
+6. 표시 | XML | 코드를 글자로, 금액 형식 | `{= ... }`, `sap.ui.model.type.Currency` | 12부
+.
+
+@kw 작은 앱 한 개 완성하기
+d: 반을 골라 검색하면 그 반 학생만 테이블에 보이고, 한 줄을 누르면 아래에 상세가 나오는 앱이에요. 파일은 데이터, 화면, 동작 세 개예요.
+c:json
+{
+    "esStdList": [
+        { "Sid": "25010001", "Sname": "민수", "Cid": "CL301" },
+        { "Sid": "25010002", "Sname": "지아", "Cid": "CL302" },
+        { "Sid": "25010003", "Sname": "도윤", "Cid": "CL301" }
+    ]
+}
+.
+c:xml
+<mvc:View controllerName="ncode.zcXXw0205.controller.View1"
+    xmlns:mvc="sap.ui.core.mvc" xmlns:core="sap.ui.core" xmlns="sap.m">
+    <Page title="학생 찾기">
+        <content>
+            <HBox alignItems="Center" class="sapUiSmallMargin">
+                <ComboBox id="cmbClass" class="sapUiSmallMarginEnd">
+                    <items>
+                        <core:Item key="CL301" text="301반" />
+                        <core:Item key="CL302" text="302반" />
+                    </items>
+                </ComboBox>
+                <Button text="검색" press=".onSearch" />
+            </HBox>
+            <Table id="tabStd" items="{/esStdList}" mode="SingleSelectMaster" selectionChange=".onSelect">
+                <columns>
+                    <Column><header><Text text="학생번호" /></header></Column>
+                    <Column><header><Text text="이름" /></header></Column>
+                </columns>
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <Text text="{Sid}" />
+                            <Text text="{Sname}" />
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+            <Panel id="pnlDetail" headerText="상세" class="sapUiSmallMargin">
+                <Text text="{Sname}" />
+                <Text text="{Sid}" />
+            </Panel>
+        </content>
+    </Page>
+</mvc:View>
+.
+c:js
+sap.ui.define([
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/model/json/JSONModel",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator"
+], function (Controller, JSONModel, Filter, FilterOperator) {
+    "use strict";
+
+    return Controller.extend("ncode.zcXXw0205.controller.View1", {
+        onInit: async function () {
+            const oModel = new JSONModel();
+            await oModel.loadData("model/data.json");      // 파일이 도착할 때까지 기다려요
+            this.getView().setModel(oModel);               // 화면에 모델 연결
+        },
+
+        onSearch: function () {
+            const sClass = this.byId("cmbClass").getSelectedKey();
+            const oBinding = this.byId("tabStd").getBinding("items");
+            const aFilter = sClass ? [new Filter("Cid", FilterOperator.EQ, sClass)] : [];
+            oBinding.filter(aFilter);                      // 반을 안 골랐으면 전체 보기
+        },
+
+        onSelect: function (oEvent) {
+            const oItem = oEvent.getParameter("listItem");           // 고른 줄
+            const sPath = oItem.getBindingContext().getPath();       // 그 줄의 위치
+            this.byId("pnlDetail").bindElement(sPath);               // 상세 패널의 기준으로 지정
+        }
+    });
+});
+.
+e: 화면이 만들어지면 `onInit`이 한 번 실행돼서 데이터 파일을 읽고 모델을 연결해요. 검색 버튼을 누르면 `onSearch`가, 테이블의 한 줄을 누르면 `onSelect`가 실행돼요.
+
+@kw 단계별로 기억할 점
+d: 흐름을 만들 때 자주 어긋나는 네 가지예요.
+s: 초깃값을 정한 뒤에는 `this.onSearch()`를 불러요. `onInit`에 필터 코드를 또 쓰면 같은 논리가 두 곳에 생겨서 처음 화면과 검색 결과가 달라질 수 있어요.
+s: 상세는 복사하지 말고 경로로 연결해요. `setData(getObject())`보다 `bindElement(getPath())`가 짧고 안전해요.
+s: 팝업은 화면에 보이는 것을 기준으로 연결해요. 콤보박스 선택값을 기준으로 하면, 콤보만 바꾸고 검색을 안 누른 상태에서 패널과 팝업 내용이 달라져요.
+w: 아무것도 선택되지 않은 경우를 막아요. `getSelectedItem()`이나 `getBindingContext()`가 없을 때는 `if (!oCtx) return;`로 일찍 끝내요.
+s: 화면은 작업 순서대로 왼쪽에서 오른쪽으로 [검색 조건 | 목록 | 상세]를 놓으면 시선이 한 방향으로 움직여요. SAP Fiori의 Flexible Column Layout도 같은 생각이에요.
+
+@ch ch-14 | 14부 | 흔한 에러 모음 | 수업 프로젝트와 과제에서 실제로 나온 에러들이에요. 증상으로 찾아봐요.
+
+@kw 증상별 원인과 해결
+d: 화면이 이상하면 아래 표에서 증상부터 찾아봐요.
+tb:
+증상 | 원인 | 해결
+앱이 아예 안 열림, SyntaxError | `async` 없는 함수에서 `await`, 메서드 사이 쉼표 누락 | 함수 앞에 `async`, 메서드 끝마다 `,`
+팝업이 두 번째 클릭부터 duplicate id | `let oDialog`가 함수 안에 있어서 매번 새로 만듦 | `this._oDialog`에 저장
+팝업 첫 클릭부터 duplicate id | View XML에 같은 id의 Dialog가 남아 있음 | View의 Dialog 삭제
+Fragment를 못 불러옴 (404) | Fragment 이름의 앱 id가 틀림 | `manifest.json`의 앱 id + `.view.파일이름`
+`Cannot read properties of undefined` | `byId("...")`인데 XML에 그 id가 없음 | XML에 `id` 추가
+`oPage is not defined` | 선언하지 않은 변수, 오타 | 변수 이름 확인
+바인딩한 컨트롤이 비어 있음 | 이름 있는 모델 문법 오류 `{/empModel>/...}` | `{empModel>/...}`
+목록은 생기는데 글자가 빈칸 | 템플릿 안에서 모델 이름을 빠뜨림 | `{bookInfo>bCode}`
+`getBindingContext()`가 `undefined` | 이름 있는 모델인데 이름을 안 넣음 | `getBindingContext("bookInfo")`
+데이터를 읽었는데 화면이 빈칸 | JSON 구조가 다르거나 문법 오류 | `oModel.getData()`를 찍어 구조 확인
+필터 결과가 0건 | 자료형 불일치 (`"2"` vs `2`) | `Number(sKey)`
+데이터를 바꿨는데 화면이 그대로 | `getData()`로 꺼낸 객체를 직접 수정 | `setProperty` 또는 `refresh(true)`
+`setData` 후에도 화면이 그대로 | 다른 모델에 넣음, `await` 없는 `loadData`가 나중에 덮어씀 | 같은 모델인지 확인, `await`
+다른 콤보박스 선택이 안 바뀜 | 다른 콤보박스의 Item으로 `setSelectedItem` | `setSelectedKey(키)`
+배열 번호가 `"01"`이 됨 | 배열에 `for...in` 사용 | `for` 또는 `for...of`
+안쪽 함수에서 `this`가 컨트롤러가 아님 | 메서드 안에 `function`으로 함수를 또 만듦 | 화살표 함수
+페이지 이동 두 번째부터 에러 | `bindItems`에 `templateShareable: true` 누락 | 옵션 추가
+스크롤해도 더 안 불러옴 | 처음 보여주는 줄이 영역보다 짧음 | `growingThreshold`를 늘리거나 높이를 줄이기
+.
+
+@kw 막혔을 때 순서
+d: 에러를 만나면 이 순서로 원인을 좁혀요.
+s: 1. 콘솔(F12)의 맨 위 빨간 에러부터 읽어요. 오른쪽 줄 번호를 눌러 해당 줄로 가요.
+s: 2. 문제가 나는 줄 바로 앞에서 값을 `console.log`로 찍어요. `undefined`가 나오는 첫 단계를 찾아요.
+s: 3. 화면이 비어 있으면 모델 데이터를 확인해요: `console.log(this.getView().getModel().getData())`
+s: 4. Binding Path를 자바스크립트 경로로 바꿔 봐요. `{/esStdList/1/Sname}` → `oData.esStdList[1].Sname`이 실제로 있나요?
+s: 5. 그래도 모르겠으면 크롬 확장 UI5 Inspector로 컨트롤을 눌러 봐요. 어떤 모델의 어느 경로에 바인딩돼 있는지 보여줘요.
+
+@ch ch-15 | 15부 | 개발 도구 꿀팁 | BAS(SAP Business Application Studio)는 브라우저 안에서 열리는 코드 편집기예요. VS Code와 같은 뿌리로 만들어져서 단축키가 거의 같아요. 순서대로 읽지 않아도 돼요.
+
+@kw Dev Space
+d: BAS 안의 내 전용 작업실이에요. 서버 위에 있어서 컴퓨터를 바꿔도 같은 작업실을 열 수 있어요.
+tb:
+상태 | 뜻 | 해야 할 일
+RUNNING | 켜져 있어요 | 이름을 눌러 들어가요
+STOPPED | 꺼져 있어요 | 시작(Start)을 누르고 기다려요
+STARTING | 켜지는 중이에요 | 잠시 기다려요
+.
+s: 한동안 쓰지 않으면 자동으로 꺼질 수 있어요. "어제까지 되던 화면이 안 열려요"면 먼저 STOPPED인지 봐요.
+w: 들어가면 파일(File) → 폴더 열기(Open Folder)로 프로젝트 폴더를 열어요. 바로 위 폴더를 열면 파일이 한 단계 더 깊이 들어가 헷갈려요. 왼쪽 목록 맨 위에 프로젝트 이름이 보이게 열어요.
+
+@kw BAS 화면 구역
+d: 화면은 다섯 구역으로 나뉘어요.
+tb:
+구역 | 어디 | 하는 일
+Activity Bar | 맨 왼쪽 세로 아이콘 줄 | 파일, 검색, Extension 같은 서랍을 바꿔요
+Side Bar | Activity Bar 오른쪽 | 선택한 서랍의 내용 (파일 목록 등)
+편집기(Editor) | 가운데 큰 영역 | 코드를 읽고 써요. 열린 파일은 탭으로
+패널(Panel) | 아래쪽 | 터미널, 문제 목록, 출력
+Status Bar | 맨 아래 가는 줄 | 줄 번호, 파일 종류, 에러 개수
+.
+w: 탭의 파일 이름 옆에 `X` 대신 점(●)이 보이면 아직 저장하지 않았다는 뜻이에요. 코드를 고쳤는데 화면이 그대로면 이 점부터 봐요.
+
+@kw 기본 단축키
+d: 거의 모든 프로그램에서 통하는 단축키예요. 하루에 하나씩만 써 봐요. 맥은 `Ctrl` 대신 `Cmd`예요.
+tb:
+단축키 | 하는 일
+`Ctrl + C` / `X` / `V` | 복사 / 잘라내기 / 붙여넣기
+`Ctrl + Z` / `Ctrl + Y` | 되돌리기 / 되돌리기 취소
+`Ctrl + S` | 저장
+`Ctrl + A` | 전체 선택
+`Ctrl + F` | 파일 안에서 찾기
+`Alt + Tab` | 열린 창 사이를 오가기
+`Win + Shift + S` | 화면 일부 캡처 (에러 질문할 때)
+.
+s: 에러를 질문할 때는 "안 돼요"보다 화면 캡처나 에러 메시지 글자를 같이 보내요.
+
+@kw Command Palette
+d: BAS가 할 수 있는 모든 일을 이름으로 검색해 실행하는 창이에요. `Ctrl + Shift + P`(안 열리면 `F1`)로 열어요.
+tb:
+단축키 | 하는 일
+`Ctrl + Shift + P` | Command Palette 열기
+`Ctrl + P` | 파일 이름 일부만 쳐서 바로 열기
+`Ctrl + Shift + F` | 프로젝트 전체에서 글자 찾기
+`Ctrl + G` | 줄 번호로 이동
+.
+tb:
+입력 | 하는 일
+`format document` | 들여쓰기 자동 정리
+`color theme` | 화면 색 바꾸기
+`new terminal` | 터미널 새로 열기
+`reload window` | BAS 새로고침 (확장 설치 뒤, 화면이 이상할 때)
+.
+
+@kw 코드 편집 단축키
+d: 줄 하나를 복사하고, 옮기고, 지우는 일을 키 하나로 끝내요.
+tb:
+단축키 | 하는 일
+`Alt + ↑` / `Alt + ↓` | 현재 줄을 위/아래로 옮기기
+`Shift + Alt + ↓` | 현재 줄을 아래에 복사
+`Ctrl + Shift + K` | 현재 줄 지우기
+`Ctrl + /` | 주석 처리/해제
+`Ctrl + D` | 같은 단어를 하나씩 더 선택해서 한 번에 바꾸기
+`Ctrl + ←` / `→` | 단어 단위로 이동
+`F8` | 다음 에러/경고로 이동
+.
+w: 한글 입력 상태에서 코드를 쓰면 `ㅊ` 같은 글자가 찍혀요. 코드는 영문 상태에서 써요.
+s: `Ctrl + D`는 같은 글자가 다른 이름 안에 들어 있으면 그것도 선택돼요. 바꾸기 전에 선택된 곳을 눈으로 확인해요.
+
+@kw 화면 넓히기 · 터미널
+d: 안 쓰는 구역은 접어 두고, 터미널(Terminal)에서는 글자로 명령을 입력해요. 터미널은 ``Ctrl + ` ``로 열어요.
+tb:
+단축키 | 하는 일
+`Ctrl + B` | 왼쪽 사이드바 접기/펴기
+`Ctrl + J` | 아래 패널 접기/펴기
+`Ctrl + Shift + X` | Extension 서랍 열기
+`Ctrl + ,` | 설정 열기
+.
+tb:
+명령 | 하는 일
+`pwd` | 지금 어느 폴더인지 보기
+`ls` | 지금 폴더 안 파일 보기
+`cd 폴더이름` / `cd ..` | 폴더로 들어가기 / 한 단계 나오기
+`clear` | 터미널 화면 비우기
+.
+s: `Tab`은 이름 자동 완성, `↑`는 방금 쓴 명령 다시 불러오기, `Ctrl + C`는 실행 중인 일 멈추기예요.
+
+@kw 브라우저가 가로채는 단축키
+d: BAS는 브라우저 안에서 돌아가서, 브라우저가 먼저 가져가는 단축키가 있어요.
+w: `Ctrl + W`는 파일 탭이 아니라 브라우저 탭을 닫을 수 있어요. 파일 탭은 `X` 버튼으로 닫아요. 실수로 닫았으면 `Ctrl + Shift + T`로 되살려요.
+s: 단축키가 안 먹히면 고장이 아니에요. Command Palette(`F1`)에서 이름으로 찾아 실행하면 대부분 해결돼요.
+
+@kw Extension
+d: 편집기에 기능을 덧붙이는 작은 프로그램이에요. `Ctrl + Shift + X`로 서랍을 열고 이름을 검색해 설치해요.
+tb:
+확장 | 하는 일
+SAP Fiori tools - Extension Pack | XML 뷰에서 컨트롤 이름과 프로퍼티 자동완성, 틀린 이름 표시 (이미 설치돼 있을 수 있어요)
+Error Lens | 에러와 경고를 문제가 난 줄 끝에 바로 보여줘요
+Prettier - Code formatter | 들여쓰기와 줄 바꿈을 한 번에 정리해요
+Material Icon Theme | 파일 종류마다 다른 아이콘
+UI5 Docs KR | UI5 공식 문서의 영어 설명을 한국어로 보여줘요
+UI5 Inspector (크롬 확장) | 화면 컨트롤이 어떤 모델과 경로에 바인딩됐는지 보여줘요
+.
+s: BAS의 확장 목록은 VS Code와 달리 Open VSX라는 다른 저장소에서 가져와요. VS Code에서 쓰던 확장이 검색에 안 나올 수 있어요.
+w: 한꺼번에 많이 깔면 BAS가 느려질 수 있어요. 출처를 모르는 `.vsix` 파일은 설치하지 않아요.
+
+@kw 설정 꿀팁
+d: `Ctrl + ,`로 설정을 열고 이름으로 검색해 바꿔요. 아래 세 가지만 바꿔도 체감이 달라져요.
+tb:
+하고 싶은 일 | 검색어 | 바꿀 값
+저장을 잊어도 되게 | `auto save` | `afterDelay`
+코드 글자 크게 | `editor font size` | 14~18
+긴 줄을 화면 안에서 줄 바꿈 | `word wrap` | `on` (단축키 `Alt + Z`)
+.
+s: 자동 저장을 켜 두면 "고쳤는데 화면이 안 바뀌어요"의 가장 흔한 원인인 저장 안 함이 사라져요.
+
+@ap appx-b | 부록 B | 프로퍼티 사전 | XML에서 컨트롤 태그 안에 적는 `이름="값"`을 한 줄씩 모았어요. 없는 것은 UI5 API Reference에서 컨트롤 이름을 검색하면 나와요.
+tb:
+이름 | 하는 일 | 자세히
+`id` | 컨트롤의 고유한 이름. `byId`로 찾을 때 필요 | 6부
+`class` | CSS 클래스. 여백 같은 모양. 여러 개는 공백으로 | 7부
+`visible` / `enabled` | 숨기기 / 회색으로 막기 | 12부
+`width`, `height` | 폭과 높이 (`100%`, `20rem`, `auto`) | 7부
+`text` / `title` | 보이는 글자 / 큰 컨트롤의 제목 | 6부
+`value` | `Input`의 내용. 모델과 연결하면 같이 바뀜 | 8부
+`placeholder` | 비어 있을 때 흐리게 보이는 안내 글 | 6부
+`editable` | `Input`에서 `false`면 읽기만 | 7부
+`description` | `Input` 값 뒤에 붙는 덧붙임 글 | 11부
+`selected` | `CheckBox`의 체크 여부 | 12부
+`press` | 버튼을 눌렀을 때 실행할 함수 | 6부
+`liveChange` / `change` | 글자를 칠 때마다 / 입력을 마쳤을 때 | 6부
+`selectionChange` | 고른 항목이 바뀔 때 | 11부
+`items` | 목록을 만들 데이터 경로 | 9부
+`key` / `selectedKey` | `core:Item`의 코드값 / 고른 항목의 코드값 | 9부
+`mode` | 테이블에서 줄을 고르는 방식 | 11부
+`growing`, `growingThreshold` | 나눠서 보여주기, 한 번에 보일 줄 수 | 11부
+`sticky` | `ColumnHeaders`면 열 제목 고정 | 11부
+`justifyContent`, `alignItems` | HBox·VBox 정렬 | 7부
+`wrap` | 자리가 모자라면 다음 줄로 (`Wrap`) | 7부
+`headerText`, `expandable`, `expanded` | `Panel`의 제목, 접기 가능, 처음에 펼침 | 7부
+`labelSpanM`, `columnsL` | `SimpleForm`의 라벨 칸 수, 큰 화면 열 수 | 7부
+`span` | `l:GridData`에서 12칸 중 차지할 칸 수 | 7부
+`xmlns` | 쓸 라이브러리를 접두어와 짝짓기 | 6부
+`controllerName` | 이 View를 맡는 컨트롤러 | 6부
+`fragmentName`, `type` | 불러올 Fragment 이름과 형식 | 7부
+`binding` | 컨트롤 하나를 한 데이터 위치에 연결 | 10부
+.
+
+@ap appx-c | 부록 C | 용어집 · 약어 풀이 | 본문에 나온 용어와 약어를 한곳에 모았어요.
+tb:
+용어 | 한 줄 뜻 | 나오는 곳
+라이브러리 (Library) | 필요할 때 꺼내 쓰는, 남이 만든 도구 모음 | 0부
+프레임워크 (Framework) | 앱의 뼈대와 규칙을 정해 둔 틀 (UI5) | 0부
+MVC (Model-View-Controller) | 데이터, 화면, 동작을 나눠 만드는 구조 | 6부
+컨트롤 (Control) | 버튼, 테이블처럼 화면에 놓는 UI5 부품 | 6부
+프로퍼티 (Property) | 컨트롤의 설정값 | 6부
+애그리게이션 (Aggregation) | 컨트롤 안에 다른 컨트롤을 넣는 자리 | 6부
+xmlns (XML NameSpace) | 태그가 어느 라이브러리의 컨트롤인지 알려주는 접두어 | 6부
+manifest.json | 앱 id, 모델, 설정을 적은 앱 설정서 | 6부
+i18n (internationalization) | 화면 문구 파일 (다국어용 이름 있는 모델) | 8부
+Fragment / Dialog | 컨트롤러 없는 화면 조각 / 팝업 창 | 7부
+모델 (Model) | 화면이 쓰는 데이터를 들고 있는 객체 | 8부
+바인딩 (Binding) | 컨트롤의 프로퍼티와 모델 데이터를 연결하는 것 | 8부
+절대경로 / 상대경로 | `/`로 시작 = 모델 맨 위부터, `/` 없음 = 기준 위치부터 | 9부
+템플릿 (Template) | 목록의 한 줄 틀 | 9부
+바인딩 컨텍스트 (Binding Context) | 항목 하나가 가리키는 데이터 위치 | 9부
+마스터-디테일 | 목록에서 고르면 상세가 따라 바뀌는 화면 | 10부
+포매터 (Formatter) | 값을 화면용 글자로 바꾸는 컨트롤러 함수 | 11부
+OData (Open Data Protocol) | SAP 서버와 데이터를 주고받는 약속 | 8부
+NaN (Not a Number) | 숫자로 바꾸지 못했을 때 나오는 값 | 2부
+JSON (JavaScript Object Notation) | 객체를 글자로 적어 두는 형식 | 1부
+API (Application Programming Interface) | 컨트롤과 모듈의 기능을 정리한 설명서 | 6부
+BAS (Business Application Studio) | 수업에서 쓰는 개발 도구 | 15부
+EQ, NE, GT, LT, GE, LE, BT | 같다, 다르다, 크다, 작다, 이상, 이하, 사이 | 11부
+KRW, USD | 원화, 미국 달러 (통화 코드) | 12부
+.
+
+@ap appx-d | 부록 D | 더 공부할 곳 | 공식 문서를 함께 보는 습관이 가장 효과가 커요.
+s: SAPUI5 SDK(ui5.sap.com)는 공식 문서 사이트예요. Documentation의 Walkthrough는 이 노트 순서와 비슷하게 한 단계씩 앱을 만들어요.
+s: API Reference에서 컨트롤 이름을 검색하면 Properties, Aggregations, Events, Methods가 다 나와요. 예: `sap.m.ComboBox` → Events → `selectionChange`의 파라미터
+s: AI에게 물어본 내용은 직접 실행하거나 공식 문서로 확인해요. 버전별 차이나 덜 알려진 메서드 이름은 틀릴 수 있어요.

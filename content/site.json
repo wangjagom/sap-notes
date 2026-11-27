@@ -1,19 +1,19 @@
 {
   "title": "Facula",
   "tagline": "차근차근 따라가는 학습 노트",
-  "intro": "개념을 순서대로, 해요체로 풀어 쓴 학습 노트 모음이에요. 지금은 SAP 교재가 첫 주제예요.",
+  "intro": "수업에서 배운 개념을 키워드와 한 줄 설명으로 정리한 노트 모음이에요.",
   "cards": [
     {
       "slug": "sap-ui5",
-      "title": "SAPUI5 총정리",
+      "title": "SAPUI5 수업 정리 노트",
       "desc": "자바스크립트 기초부터 데이터 바인딩까지",
-      "tag": "교재"
+      "tag": "노트"
     },
     {
-      "slug": "sap-backend",
-      "title": "SAP 백엔드 총정리",
-      "desc": "DB 기초부터 SQL, ABAP 데이터까지",
-      "tag": "교재"
+      "slug": "abap",
+      "title": "SAP ABAP 수업 정리 노트",
+      "desc": "SAP GUI, ABAP 문법, ABAP Dictionary, View",
+      "tag": "노트"
     }
   ],
   "links": [

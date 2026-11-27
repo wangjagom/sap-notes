@@ -1,0 +1,169 @@
+@ch ch-2 | 2부 | 흐름 제어 | 코드는 위에서 아래로 한 줄씩 실행돼요. 조건문은 "맞을 때만", 반복문은 "여러 번" 실행하게 해서 흐름을 바꿔요.
+
+@kw if
+d: 조건이 참(`true`)일 때만 코드를 실행해요. `else if`는 "아니고 이 조건이면", `else`는 "모두 아니면"이에요.
+t:
+if (조건1) {
+    실행할 코드1;
+} else if (조건2) {
+    실행할 코드2;
+} else {
+    실행할 코드3;
+}
+.
+c:js
+const nScore = 75;
+if (nScore >= 90) {
+    console.log("A");
+} else if (nScore >= 60) {
+    console.log("B");        // 75는 여기서 실행돼요
+} else {
+    console.log("C");
+}
+.
+s: 위에서부터 차례로 확인하고, 처음 맞는 곳 하나만 실행해요. `else if`와 `else`는 생략해도 돼요.
+tb:
+연산자 | 뜻 | 예
+`===`, `!==` | 같다, 다르다 | `3 === 3`
+`>`, `<` | 크다, 작다 | `5 > 3`
+`>=`, `<=` | 크거나 같다, 작거나 같다 | `60 >= 60`
+`&&` | 그리고 (둘 다 참) | `nScore >= 60 && nScore <= 100`
+`||` | 또는 (하나라도 참) | `sRole === "A" || sRole === "B"`
+`!` | 반대로 | `!bFound`
+.
+
+@kw 거짓으로 보는 값
+d: `if (값)`은 값이 `true`인지만 보지 않아요. `""`, `0`, `undefined`, `null`, `false`, `NaN` 여섯 개는 거짓으로 봐요. 나머지는 대부분 참이에요.
+c:js
+const sInput = "";              // 아무것도 안 적은 상태
+if (!sInput) {                  // ""는 거짓 → !를 붙이면 참
+    console.log("값을 입력하세요.");
+}
+.
+s: `!sInput`은 "sInput이 비어 있으면"이라고 읽어요. `NaN`(Not a Number)은 숫자로 바꾸지 못했을 때 나오는 값이에요. 예: `Number("abc")`
+w: 숫자 `0`도 거짓이에요. 0점이 정상 값인데 `if (!nScore)`로 검사하면 0점을 "입력 안 함"으로 착각해요. 숫자는 `nScore === undefined`처럼 정확히 비교해요.
+
+@kw 삼항 연산자
+d: `if`/`else`로 값 하나를 정하는 코드를 한 줄로 줄인 문법이에요. 다른 사람 코드에서 `?`와 `:`가 보이면 이거예요.
+t:
+조건 ? 참일 때 값 : 거짓일 때 값
+.
+c:js
+const nScore = 75;
+const sResult = nScore >= 60 ? "합격" : "불합격";                 // "합격"
+const sGrade = nScore >= 90 ? "A" : nScore >= 60 ? "B" : "C";   // "B"
+.
+s: 값 하나를 정할 때 쓰면 편하고, 길어지면 `if`/`else`가 읽기 쉬워요.
+
+@kw for
+d: 번호를 세면서 같은 일을 여러 번 반복해요.
+t:
+for (시작; 계속할 조건; 한 바퀴 끝날 때마다) {
+    반복할 코드;
+}
+.
+c:js
+const aNames = ["민수", "지아", "도윤"];
+for (let i = 0; i < aNames.length; i++) {
+    console.log(i, aNames[i]);     // 0 민수 / 1 지아 / 2 도윤
+}
+.
+e: 괄호 안은 세 부분이에요. 시작 `let i = 0`은 처음에 한 번만 실행돼요. `i < 3`이 참인 동안 반복하고, 한 바퀴가 끝날 때마다 `i++`로 1을 늘려요(`i = i + 1`과 같아요).
+w: 배열 번호가 0부터라서 조건은 `<`예요. `i <= aNames.length`로 쓰면 한 바퀴 더 돌아서 마지막에 `undefined`가 나와요.
+
+@kw for...of
+d: 배열에서 값을 차례로 하나씩 꺼내며 반복해요. 번호가 필요 없으면 이게 가장 쉽고 안전해요.
+t:
+for (const 항목 of 배열) {
+    반복할 코드;
+}
+.
+c:js
+const aScores = [85, 92, 58, 77];
+let nSum = 0;                      // 합계를 담을 상자
+for (const nScore of aScores) {
+    nSum += nScore;                // nSum = nSum + nScore
+}
+console.log(nSum);                 // 312
+console.log(nSum / aScores.length);   // 78 (평균)
+.
+s: 바퀴마다 새 변수가 만들어져서 `const`를 써도 돼요. 일반 `for`의 `i`는 같은 변수에 값을 다시 넣어서 `let`이어야 해요.
+s: 합계처럼 바퀴마다 값이 바뀌는 상자는 반복문 밖에 `let`으로 만들어 두고 쌓아 가요. `+=`는 "더해서 다시 넣어라"예요.
+
+@kw break · continue
+d: `break`는 반복을 아예 끝내고, `continue`는 이번 바퀴만 건너뛰고 다음 바퀴로 가요.
+c:js
+for (const nScore of aScores) {
+    if (nScore < 60) {
+        console.log("60점 미만이 있어요!");
+        break;                     // 반복을 끝내요
+    }
+}
+for (const nScore of aScores) {
+    if (nScore < 60) continue;     // 이번 바퀴만 건너뛰어요
+    console.log(nScore);           // 85, 92, 77
+}
+.
+
+@kw for...in
+d: 객체의 키를 하나씩 꺼내며 반복해요. 배열에는 `for...of`를 써요.
+c:js
+const oStudent = { name: "민수", score: 85 };
+for (const sKey in oStudent) {
+    console.log(sKey, oStudent[sKey]);     // name 민수 / score 85
+}
+.
+s: 대괄호 안에 변수를 넣으면 그 변수에 든 글자가 키가 돼요. 점은 글자 그대로를 키로 찾아요.
+tb:
+쓰는 모양 | 찾는 키
+`oStudent.score` | `score`
+`oStudent[sKey]` | `sKey` 안에 든 글자 → `score`
+`oStudent.sKey` | `sKey`라는 글자 그대로 → `undefined`
+.
+w: `for...in`을 배열에 쓰면 번호가 숫자가 아니라 문자열(`"0"`, `"1"`)로 나와서 `k + 1`이 `"01"`이 돼요.
+m: 더 알아보기: 변수를 키로 객체 만들기, while
+키 자리를 대괄호로 감싸면 변수에 든 글자가 키가 돼요.
+c:js
+const sKey = "group";
+const oNew = { [sKey]: 3 };    // { group: 3 }
+.
+`while`은 몇 번 돌지 모를 때 써요. UI5 화면 코드에서는 거의 안 써요. 조건이 계속 참이면 끝나지 않아서 브라우저가 멈춰요.
+c:js
+let nLeft = 10;
+while (nLeft > 0) {
+    nLeft = nLeft - 3;         // 10 → 7 → 4 → 1 → -2 (그때 멈춰요)
+}
+.
+/m
+
+@kw 반복문 고르기
+d: 번호가 필요하면 `for`, 값만 필요하면 `for...of`, 객체의 키를 돌 때는 `for...in`이에요.
+tb:
+문법 | 꺼내는 것 | 언제
+`for (let i = 0; i < a.length; i++)` | 번호 `i` | 번호가 필요할 때
+`for (const v of a)` | 값 자체 | 배열을 차례로 볼 때
+`for (const k in o)` | 키 이름 (문자열) | 객체의 키를 돌 때
+`while (조건)` | 없음 | 몇 번 돌지 모를 때
+.
+
+@kw 예제: 중복 없는 목록
+d: 반복문 안에 반복문을 넣어, 이미 모은 값과 하나씩 비교해 겹치지 않는 것만 모아요.
+c:js
+const aAll = [1, 2, 1, 3, 2, 1];       // 학생 6명이 속한 조 (겹쳐요)
+const aUnique = [];                    // 겹치지 않게 모을 상자
+
+for (const nGroup of aAll) {
+    let bFound = false;                // 이미 모았는지 표시
+    for (const nSaved of aUnique) {    // 모아 둔 것을 하나씩 확인
+        if (nSaved === nGroup) {
+            bFound = true;
+            break;                     // 찾았으면 더 볼 필요 없음
+        }
+    }
+    if (!bFound) {                     // 끝까지 봤는데 없으면
+        aUnique.push(nGroup);          // 추가
+    }
+}
+console.log(aUnique);                  // [1, 2, 3]
+.
+e: 핵심은 "끝까지 다 비교해 본 뒤에야 없다는 걸 안다"예요. 그래서 추가는 안쪽 반복이 끝난 뒤에 해요.

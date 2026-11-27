@@ -1,0 +1,119 @@
+@ch ch-4 | 4부 | 메서드, this, 스코프, 체이닝 | 코드를 읽다가 자주 막히는 네 가지를 풀어요. 6부 컨트롤러 코드에서 모두 다시 나와요.
+
+@kw 메서드(Method)
+d: 객체 안에 들어 있는 함수예요. `객체.메서드이름()`으로 불러요.
+t:
+const 객체이름 = {
+    메서드이름: function () {
+        실행할 코드;
+    }
+};
+객체이름.메서드이름();
+.
+c:js
+const oPerson = {
+    name: "민수",                       // 값
+    sayHi: function () {                // 메서드 (값 자리에 함수가 온 거예요)
+        console.log("안녕!");
+    }
+};
+oPerson.sayHi();     // 안녕!
+.
+s: 지금까지 쓴 `push`, `console.log`도 메서드예요. `console` 객체 안에 `log` 함수가 들어 있는 거예요.
+w: 객체 안의 항목 사이에는 쉼표가 필요해요. 빠뜨리면 `SyntaxError`가 나서 코드 전체가 실행되지 않아요.
+m: 더 알아보기: 메서드를 짧게 쓰는 모양
+`이름: function () { }`을 `이름() { }`로 줄여 쓸 수도 있어요. 같은 뜻이에요. 새 UI5 프로젝트나 공식 예제에서 자주 만나요.
+c:js
+const oPerson = {
+    sayHi: function () { console.log("안녕!"); },
+    sayBye() { console.log("잘 가!"); }          // 짧게 쓴 모양
+};
+.
+/m
+
+@kw this
+d: 메서드를 부른 객체 자신이에요. 부르는 모양에서 점(`.`) 바로 앞에 있는 객체가 `this`가 돼요.
+c:js
+const oCounter = {
+    nCount: 0,
+    up: function () {
+        this.nCount++;                  // 내(oCounter)의 nCount를 1 늘려요
+        this.show();                    // 내(oCounter)의 show를 불러요
+    },
+    show: function () {
+        console.log("현재: " + this.nCount);
+    }
+};
+oCounter.up();     // 현재: 1
+oCounter.up();     // 현재: 2
+.
+w: `this`는 함수를 만들 때가 아니라 부를 때 정해져요. 메서드 안에서 `function`으로 만든 콜백 함수는 점 없이 불려서 `this`가 그 객체가 아니에요. 화살표 함수는 자기 `this`가 없어서 적힌 자리의 `this`를 그대로 써요.
+c:js
+function doTwice(fnTask) { fnTask(); fnTask(); }
+
+const oFriend = {
+    nick: "민수",
+    start: function () {
+        doTwice(function () {
+            console.log(this.nick);     // ❌ 여기 this는 oFriend가 아니에요
+        });
+        doTwice(() => {
+            console.log(this.nick);     // ✅ 민수  (적힌 자리의 this를 써요)
+        });
+    }
+};
+oFriend.start();
+.
+tb:
+부르는 모양 | 함수 안의 this
+`oFriend.start()` | `oFriend` (점 앞에 oFriend)
+`fnTask()` | 없음 (점 앞이 비어 있어요)
+화살표 함수 | 적힌 자리의 this 그대로
+.
+s: 메서드 안에서 콜백 함수를 넘기고 그 안에서 `this`를 써야 하면 화살표 함수로 써요.
+m: 더 알아보기: 점 앞이 비어 있으면 this는?
+파일 맨 위에 `"use strict"`가 있으면 `undefined`, 없으면 브라우저 전체를 가리키는 `window`예요. UI5 컨트롤러 파일은 `"use strict"`가 있어서 `this.nick`에서 에러가 나요.
+/m
+
+@kw 스코프(Scope)
+d: 변수가 살아 있는 범위예요. `let`, `const` 변수는 자기가 든 `{ }` 안에서만 보여요.
+c:js
+if (true) {
+    const sInner = "안쪽";
+}
+console.log(sInner);    // ReferenceError: sInner is not defined
+.
+e: 함수 안에서 만든 변수는 함수가 끝나면 사라지고, 다음에 부르면 새로 만들어져요. 그래서 아래 `countUp()`은 몇 번을 불러도 1이에요.
+c:js
+function countUp() {
+    let nCount = 0;          // 부를 때마다 0에서 새로 시작해요
+    nCount++;
+    console.log(nCount);
+}
+countUp();    // 1
+countUp();    // 1  ← 지난번 값은 사라졌어요
+.
+s: 계속 기억해야 하는 값은 함수 밖이나 객체(`this`)에 두고, 이번 한 번만 쓸 값은 함수 안에 `const`나 `let`으로 둬요.
+
+@kw 메서드 체이닝(Method Chaining)
+d: 앞 메서드가 돌려준 값에 바로 점을 찍고 다음 메서드를 불러요. 오른쪽으로 갈수록 값이 한 번씩 가공돼요.
+c:js
+const sRaw = "  김민수, 박지아 ,이도윤  ";
+const aNames = sRaw.trim().split(",").map(s => s.trim());
+// ["김민수", "박지아", "이도윤"]
+.
+tb:
+단계 | 코드 | 결과
+1 | `sRaw.trim()` | 양 끝 공백 제거
+2 | `.split(",")` | 쉼표 기준으로 잘라 배열로
+3 | `.map(s => s.trim())` | 각각 공백 제거
+.
+w: 중간 값이 `undefined`나 `null`이면 그 뒤에 이어 붙인 메서드는 전부 에러가 나요. 길게 이어진 줄에서 에러가 나면 한 단계씩 끊어서 `console.log`로 확인해요.
+m: 더 알아보기: 옵셔널 체이닝(?.)
+`?.`는 앞이 `undefined`나 `null`이면 에러 없이 멈추고 `undefined`를 돌려줘요. 다만 에러를 숨기기도 해서, 원인을 찾을 때는 어디가 비었는지 먼저 확인해요.
+c:js
+const oUser = {};
+oUser.address.trim();      // TypeError
+oUser.address?.trim();     // undefined
+.
+/m
