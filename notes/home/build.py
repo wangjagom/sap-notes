@@ -11,7 +11,7 @@ NOTES = [
      'tags': ['자바스크립트', 'XML View', '바인딩', '필터·정렬']},
     {'slug': 'abap', 'icon': 't-db-blue-E', 'title': 'SAP ABAP 수업 정리 노트',
      'desc': 'SAP GUI 첫 화면부터 ABAP 문법, ABAP Dictionary, View와 Search Help까지. 실제 SAP 화면 사진과 함께 배운 순서대로 정리했어요.',
-     'tags': ['SE38', 'SE11', 'SELECT', '인터널 테이블']},
+     'tags': ['SE38', 'SE11', 'SELECT', '인터널 테이블'], 'updated': '11월 26일 수업까지 반영'},
 ]
 TOOLS = [{'title': 'ERD 설계 도구', 'desc': '테이블 관계를 그려 보는 도구', 'url': 'https://wangjagom.github.io/erd-designer/'}]
 
@@ -33,10 +33,10 @@ def card(n):
     <b>%s</b>
     <p>%s</p>
     <ul class="tags">%s</ul>
-    <span class="meta">%d%s · 키워드 %d개</span>
+    <span class="meta">%d%s · 키워드 %d개%s</span>
   </div>
   <span class="go" aria-hidden="true">→</span>
-</a></li>''' % (n['slug'], n['icon'], html.escape(n['title']), html.escape(n['desc']), tags, ch, unit, kw)
+</a></li>''' % (n['slug'], n['icon'], html.escape(n['title']), html.escape(n['desc']), tags, ch, unit, kw, (' · ' + n['updated']) if n.get('updated') else '')
 
 
 CSS = '''

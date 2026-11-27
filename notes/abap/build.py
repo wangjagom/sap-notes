@@ -59,6 +59,7 @@ body = re.sub(r'<header class="masthead">.*?</header>', '''<header class="masthe
   <p class="kicker">SAP CODE 부트캠프 수업 노트</p>
   <h1>SAP ABAP 수업 정리 노트</h1>
   <p class="sub">배운 순서대로, 키워드와 한 줄 설명으로 정리했어요.</p>
+  <p class="updated"><span class="dot" aria-hidden="true"></span>2026년 11월 26일 수업까지 반영</p>
   <p class="meta"><span>SAP S/4HANA 2023</span><span>ABAP 7.58</span><span>클라이언트 100</span></p>
   <p class="intro-line">"주의"는 꼭 지킬 점, "비유"는 낯선 개념을 익숙한 것에 빗댄 설명이에요. 점선 밑줄 <span class="term" data-tip="이렇게 생긴 말은 마우스를 올리거나 눌러서 짧은 뜻을 볼 수 있어요.">용어</span>는 눌러서 뜻을 봐요. "더 알아보기"는 처음엔 안 봐도 되는 내용이에요.</p>
 </header>''', body, count=1, flags=re.S)
@@ -88,6 +89,7 @@ for g, ids in GROUPS:
     parts.append('</ol>')
 nav = '''<nav class="nav" id="nav" aria-label="개념 메뉴">
   <a class="nav-brand" href="#top">SAP ABAP 수업 정리 노트</a>
+  <p class="nav-updated">11월 26일 수업까지 반영</p>
   <div class="view-toggle vt-nav" role="group" aria-label="보기 방식"><button type="button" data-mode="core" aria-pressed="true">핵심만</button><button type="button" data-mode="full" aria-pressed="false">자세히</button></div>
   <div class="nav-head">
     <input id="nav-q" class="nav-search" type="search" placeholder="개념 검색" autocomplete="off" aria-label="개념 검색">
