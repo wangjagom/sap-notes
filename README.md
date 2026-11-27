@@ -1,8 +1,8 @@
-# Facula
+# sap-notes
 
 차근차근 따라가는 학습 노트 사이트예요. 지금은 SAPUI5와 SAP ABAP 수업 정리 노트가 있어요.
 
-주소: https://wangjagom.github.io/facula/
+주소: https://wangjagom.github.io/sap-notes/
 
 사이트는 Astro로 만들어요. `main`에 push하면 GitHub Actions가 빌드해서 GitHub Pages에 배포해요.
 예전 파이썬 빌드(`tools/build.py`)는 결과를 비교하고 그림 조각을 뽑는 용도로만 남아 있어요.
@@ -47,7 +47,7 @@ m: 더 알아보기 제목  ...  /m
 ## 폴더 구조
 
 ```
-facula/
+sap-notes/
 ├─ content/                       글(원본)
 │   ├─ site.json                  첫 화면의 카드·링크 목록
 │   ├─ sap-backend/doc.md         SAP 백엔드 총정리 (본문)
@@ -81,7 +81,7 @@ Node.js 20 이상이 필요해요. 파이썬은 필요 없어요.
 
 ```bash
 npm install
-npm run dev        # http://localhost:4321/facula/
+npm run dev        # http://localhost:4321/sap-notes/
 npm run build      # 타입 검사 + dist/ 생성
 npm run preview    # dist/ 미리보기
 ```
